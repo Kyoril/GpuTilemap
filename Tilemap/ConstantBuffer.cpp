@@ -23,12 +23,3 @@ ConstantBuffer::ConstantBuffer(ID3D11Device& device, const uint32_t size, const 
 	HRESULT hr = device.CreateBuffer(&bufferDesc, initialData ? &bufferData : nullptr, &m_buffer);
 	ThrowIfFail(hr);
 }
-
-void* ConstantBuffer::Map()
-{
-	return nullptr;
-}
-
-void ConstantBuffer::Unmap()
-{
-}

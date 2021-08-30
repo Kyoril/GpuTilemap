@@ -19,10 +19,6 @@ public:
 	~VertexBuffer() override = default;
 
 public:
-	void* Map() override;
-	void Unmap() override;
-
-public:
 	uint32_t GetVertexCount() const { return m_vertexCount; }
 	uint32_t GetVertexSize() const { return m_vertexSize; }
 	bool IsDynamic() const { return m_dynamic; }

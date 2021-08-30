@@ -33,12 +33,3 @@ IndexBuffer::IndexBuffer(ID3D11Device& device, uint32_t indexCount, IndexSize in
 	HRESULT hr = device.CreateBuffer(&bufferDesc, initialData ? &initData : nullptr, &m_buffer);
 	ThrowIfFail(hr);
 }
-
-void* IndexBuffer::Map()
-{
-	return nullptr;
-}
-
-void IndexBuffer::Unmap()
-{
-}

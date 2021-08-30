@@ -18,10 +18,6 @@ public:
 	explicit ConstantBuffer(ID3D11Device& device, uint32_t size, const void* initialData = nullptr);
 	~ConstantBuffer() override = default;
 
-public:
-	void* Map() override;
-	void Unmap() override;
-
 private:
 	ComPtr<ID3D11Buffer> m_buffer;
 };

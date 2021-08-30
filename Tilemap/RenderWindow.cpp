@@ -121,6 +121,11 @@ void RenderWindow::PerformResize()
 	ThrowIfFail(hr);
 
 	CreateSizeDependantResources();
+	
+	if (m_listener)
+	{
+		m_listener->OnResize(*this);
+	}
 }
 	
 void RenderWindow::CreateSizeDependantResources()

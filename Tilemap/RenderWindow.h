@@ -20,6 +20,8 @@ public:
 	/// @brief Executed if a render window is closed.
 	/// @param window The render window that was just closed.
 	virtual void OnRenderWindowClosed(class RenderWindow& window) {};
+	
+	virtual void OnResize(class RenderWindow& window) {};
 };
 
 class RenderWindow final

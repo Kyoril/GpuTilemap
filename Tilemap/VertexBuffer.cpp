@@ -35,12 +35,3 @@ VertexBuffer::VertexBuffer(ID3D11Device& device, const uint32_t vertexCount, con
 	HRESULT hr = device.CreateBuffer(&bufferDesc, initialData ? &initData : nullptr, &m_buffer);
 	ThrowIfFail(hr);
 }
-
-void* VertexBuffer::Map()
-{
-	return nullptr;
-}
-
-void VertexBuffer::Unmap()
-{
-}

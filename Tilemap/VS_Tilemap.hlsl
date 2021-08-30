@@ -20,6 +20,7 @@ struct VS_In
 {
 	float4 pos : POSITION;
 	float2 uv : TEXCOORD0;
+	uint id : VERTEXID;
 };
 
 struct VS_Out
@@ -35,6 +36,14 @@ VS_Out main( VS_In input )
 {
 	VS_Out output;
 	
+	if (input.id == 1) input.pos.x = viewportSize.x * 2.0;
+	else if (input.id == 2) input.pos.y = viewportSize.y * 2.0;
+	else if (input.id == 3) 
+	{
+		input.pos.x = viewportSize.x * 2.0;
+		input.pos.y = viewportSize.y * 2.0;
+	}
+
 	output.pixelCoord = (input.uv * viewportSize) + viewOffset;
 	output.texCoord = output.pixelCoord * inverseTileTextureSize * inverseTileSize;
 

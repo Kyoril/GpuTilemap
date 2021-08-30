@@ -25,10 +25,6 @@ public:
 	~IndexBuffer() override = default;
 
 public:
-	void* Map() override;
-	void Unmap() override;
-
-public:
 	uint32_t GetIndexCount() const { return m_indexCount; }
 	IndexSize GetIndexSize() const { return m_indexSize; }
 	bool IsDynamic() const { return m_dynamic; }

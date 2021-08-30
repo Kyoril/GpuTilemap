@@ -149,13 +149,15 @@ public:
 
 	void SetTextures(ShaderStage stage, uint32_t numTextures, Texture** textures);
 
+	void UpdateConstantBuffer(ConstantBuffer& buffer, const void* data);
+
 private:
 	ID3D11Device& m_device;
 	ComPtr<ID3D11DeviceContext> m_context;
 	BlendMode m_blendMode = BlendMode::Alpha;
 	FillMode m_fillMode = FillMode::Solid;
 	FaceCullMode m_cullMode = FaceCullMode::None;
-	TextureAddressMode m_texAddressMode = TextureAddressMode::Clamp;
+	TextureAddressMode m_texAddressMode = TextureAddressMode::Border;
 	TextureFilter m_texFilter = TextureFilter::None;
 	D3D11_RASTERIZER_DESC m_rasterizerDesc;
 	bool m_rasterizerDescChanged = false;

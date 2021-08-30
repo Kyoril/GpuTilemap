@@ -90,6 +90,10 @@ void GraphicsContext::InitSamplerState()
 	m_samplerDesc.AddressU = D3D11TextureAddressMode(m_texAddressMode);
 	m_samplerDesc.AddressV = D3D11TextureAddressMode(m_texAddressMode);
 	m_samplerDesc.AddressW = D3D11TextureAddressMode(m_texAddressMode);
+	m_samplerDesc.BorderColor[0] = 1.0f;
+	m_samplerDesc.BorderColor[1] = 1.0f;
+	m_samplerDesc.BorderColor[2] = 1.0f;
+	m_samplerDesc.BorderColor[3] = 0.0f;
 	m_samplerDescChanged = true;
 
 	HRESULT hr = m_device.CreateSamplerState(&m_samplerDesc, &m_samplerState);
@@ -400,4 +404,9 @@ void GraphicsContext::SetTextures(ShaderStage stage, uint32_t numTextures, Textu
 		m_context->PSSetSamplers(0, numTextures, states);
 		break;
 	}
+}
+
+void GraphicsContext::UpdateConstantBuffer(ConstantBuffer& buffer, const void* data)
+{
+	m_context->UpdateSubresource(buffer.m_buffer.Get(), 0, nullptr, data, 0, 0);
 }

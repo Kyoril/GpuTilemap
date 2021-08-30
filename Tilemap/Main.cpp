@@ -40,7 +40,28 @@ struct VERTEX
 {
     float X, Y, Z;    // vertex position
 	float u, v;
+	uint32_t id;
 };
+
+
+DirectX::XMMATRIX s_matrices[3];
+struct PSPerObject
+{
+	float inverseTilesetTextureSize[2];
+	float inverseTilemapTextureSize[2];
+	float tileSize;
+
+	float padding[3]{};
+} s_psPerObjectData{};
+struct VSPerFrame
+{
+	float viewOffset[2];
+	float viewportSize[2];
+	float inverseTileTextureSize[2];
+	float inverseTileSize;
+		
+	float padding{};
+} s_vsPerFrameData{};
 
 /// @brief Loads resources required for this specific sample.
 void LoadResources()
@@ -57,10 +78,10 @@ void LoadResources()
 	// create a triangle out of vertices
     const VERTEX OurVertices[] =
     {
-        { 0.0f,	0.0f,	5.0f,		0.0f, 0.0f },
-        { w,	0.0f,	5.0f,		1.0f, 0.0f },
-        { 0.0f,	h,		5.0f,		0.0f, 1.0f },
-        { w,	h,		5.0f,		1.0f, 1.0f }
+        { 0.0f,	0.0f,	5.0f,		0.0f, 0.0f,	0 },
+        { w,	0.0f,	5.0f,		1.0f, 0.0f, 1 },
+        { 0.0f,	h,		5.0f,		0.0f, 1.0f, 2 },
+        { w,	h,		5.0f,		1.0f, 1.0f, 3 }
     };
 	s_tilemapVBuf = s_device->CreateVertexBuffer(ARRAYSIZE(OurVertices), sizeof(VERTEX), OurVertices);
 
@@ -70,41 +91,23 @@ void LoadResources()
 	};
 	s_tilemapIBuf = s_device->CreateIndexBuffer(ARRAYSIZE(Indices), IndexSize::Index16, Indices);
 
-	DirectX::XMMATRIX mat[3];
-	mat[0] = DirectX::XMMatrixIdentity();
-	mat[1] = DirectX::XMMatrixIdentity();
-	mat[2] = DirectX::XMMatrixOrthographicOffCenterLH(0.0f, s_renderTarget->GetWidth(), s_renderTarget->GetHeight(), 0.0f, 0.001f, 100.0f);
-	s_vsPerObject = s_device->CreateConstantBuffer(sizeof(DirectX::XMMATRIX) * 3, mat);
-
-	struct PSPerObject
-	{
-		float inverseTilesetTextureSize[2];
-		float inverseTilemapTextureSize[2];
-		float tileSize;
-
-		float padding[3]{};
-	} psPerObject {
+	s_matrices[0] = DirectX::XMMatrixIdentity();
+	s_matrices[1] = DirectX::XMMatrixIdentity();
+	s_matrices[2] = DirectX::XMMatrixOrthographicOffCenterLH(0.0f, s_renderTarget->GetWidth(), s_renderTarget->GetHeight(), 0.0f, 0.001f, 100.0f);
+	s_vsPerObject = s_device->CreateConstantBuffer(sizeof(DirectX::XMMATRIX) * 3, s_matrices);
+	s_psPerObjectData = {
 		1.0f / 128.0f, 1.0f / 128.0f,
 		1.0f / 42.0f, 1.0f / 34.0f,
 		16.0f
 	};
-	s_psPerObject = s_device->CreateConstantBuffer(sizeof(psPerObject), &psPerObject);
-
-	struct VSPerFrame
-	{
-		float viewOffset[2];
-		float viewportSize[2];
-		float inverseTileTextureSize[2];
-		float inverseTileSize;
-		
-		float padding{};
-	} vsPerFrame {
+	s_psPerObject = s_device->CreateConstantBuffer(sizeof(s_psPerObjectData), &s_psPerObjectData);
+	s_vsPerFrameData = {
 		0.0f, 0.0f,
 		s_renderTarget->GetWidth() / scale, s_renderTarget->GetHeight() / scale,
 		1.0f / 42.0f, 1.0f / 34.0f,
 		1.0f / 16.0f
 	};
-	s_vsPerFrame = s_device->CreateConstantBuffer(sizeof(vsPerFrame), &vsPerFrame);
+	s_vsPerFrame = s_device->CreateConstantBuffer(sizeof(s_vsPerFrameData), &s_vsPerFrameData);
 
 	s_tilemap = PngLoader::CreateTexture("./spelunky0.png", *s_device);
 	s_tileset = PngLoader::CreateTexture("./spelunky-tiles.png", *s_device);
@@ -124,6 +127,8 @@ int32_t DoMessageLoop()
 	return static_cast<int32_t>(msg.wParam);
 }
 
+volatile bool m_resized = false;
+
 /// @brief This thread renders the game.
 void RenderThread()
 {
@@ -133,6 +138,18 @@ void RenderThread()
 	GraphicsContext& context = s_device->GetImmediateContext();
 	while(!s_terminate)
 	{
+		if (m_resized)
+		{
+			s_matrices[2] = DirectX::XMMatrixOrthographicOffCenterLH(0.0f, s_renderTarget->GetWidth(), s_renderTarget->GetHeight(), 0.0f, 0.001f, 100.0f);
+			context.UpdateConstantBuffer(*s_vsPerObject, &s_matrices);
+
+			s_vsPerFrameData.viewportSize[0] = s_renderTarget->GetWidth() / scale;
+			s_vsPerFrameData.viewportSize[1] = s_renderTarget->GetHeight() / scale;
+			context.UpdateConstantBuffer(*s_vsPerFrame, &s_vsPerFrameData);
+
+			m_resized = false;
+		}
+
 		context.Reset();
 
 		context.SetViewport(0, 0, s_renderTarget->GetWidth(), s_renderTarget->GetHeight(), 0.0f, 1.0f);
@@ -178,6 +195,11 @@ public:
 	void OnRenderWindowClosed(RenderWindow& window) override
 	{
 		PostQuitMessage(0);
+	}
+	
+	void OnResize(RenderWindow& window) override
+	{
+		m_resized = true;
 	}
 };
 
